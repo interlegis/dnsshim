@@ -79,6 +79,20 @@ public class XfrdLauncher {
 		SlaveGroupDumperManager.launch();
 		DnsshimSessionCollectorManager.launch();
 		
+		final Thread mainThread = Thread.currentThread();
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+		    public void run() {
+		        SHUTDOWN = true;
+		        try {
+		        	logger.info("Shutdown signal received");
+		        	mainThread.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    }
+		});
+		
 		while (SHUTDOWN == false) {
 			try {
 				Thread.sleep(5000);
