@@ -1,0 +1,47 @@
+DNSSHIM: NIC.br's DNS Secure Hidden Master
+
+version 2.2
+	* TLS certificate import fix
+	* overwrite_mname is now an option on xfrd config file
+
+version 2.1
+	* Support TLSA record
+	
+version 2.0
+	* Uses a database to store metadata
+	* New auto-balance option to balance among several slave-groups
+	* Various bugfixes
+	* Please read how to migrate from previous version on manual_en.pdf
+	 
+version 1.2
+	* Avoid having to load zone configurations file for every DNS query
+	* After reading a zone configuration file, no need to write it back to disk	
+	* Allocate 1k instead of 64k for the incoming DNS query via UDP
+	* Graceful shutdown via client command
+		
+version 1.1
+	* domain name validation
+	* remove unused files after zone removal
+	* minor bugfixes
+	
+version 1.0
+	* Slave synchronization done via rndc (only on BIND 9.7.2)
+	* SOA version by default uses Julian Date format
+	Bug fixes
+	* DS RR: keytag is now unsigned in presentation mode 
+	* DS RR: printing algorithm and digest values instead strings
+	* Resign scheduler shall respect high/low priority interval.
+	* Always keep a well formed configuration file.
+	* Imported zones aren't signed by default
+	* Rollback zone properly when publication fails
+
+version 0.1beta3 (2009-06-23):
+	Bug Fixes:
+	* CNAME RR handling. Don't allow for an ownername to have a CNAME and other RRs. 
+
+version 0.1beta2 (2009-05-29):
+	Bug Fixes:
+	* Domain names must be in lower case form for signing
+	
+version 0.1beta1 (2009-05-22):
+	* First Public Beta Release!

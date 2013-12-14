@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:element name="dnsshim" type="dnsshimType" />
+  <xsd:complexType name="dnsshimType">
+    <xsd:sequence>
+      <xsd:element name="request" type="requestType" />
+    </xsd:sequence>
+    <xsd:attribute name="version" type="xsd:decimal" />
+  </xsd:complexType>
+  <xsd:complexType name="requestType">
+    <xsd:sequence>
+      <xsd:element name="printSlaveGroup" type="printSlaveGroupType" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="printSlaveGroupType">
+    <xsd:sequence>
+      <xsd:element name="sessionId" nillable="false">
+      	<xsd:simpleType>
+      		<xsd:restriction base="xsd:decimal">
+      		</xsd:restriction>
+      	</xsd:simpleType>
+      </xsd:element>
+      <xsd:element name="slaveGroup" nillable="false">
+      	<xsd:simpleType>
+      		<xsd:restriction base="xsd:string">
+      			<xsd:pattern value=".+"></xsd:pattern>
+      		</xsd:restriction>
+      	</xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dnsshim" default="dist" basedir=".">
+
+	<property name="src" location="src" />
+	<property name="build" location="build" />
+	<property name="dist" location="dnsshim-dist" />
+
+	<target name="init">
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="compile" depends="init" description="compile the source">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}" debug="on" deprecation="true">
+			<classpath>
+				<pathelement path="${classpath}" />
+				<fileset dir="lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+		<copy todir="${build}" >
+		    <fileset dir="${src}">
+		    	<include name="**/resources/**" />
+		    </fileset>	
+		</copy>
+	</target>
+	
+
+	<target name="dist" depends="compile" description="generate the distribution">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/lib" />
+
+		<!--  signer -->
+		<jar jarfile="${dist}/dnsshim-signer.jar">
+			<fileset dir="${build}/" excludes="**/xfrd/" />
+		    
+			<manifest>
+				<attribute name="Main-Class"
+					value="br/registro/dnsshim/signer/server/SignerServer" />
+				<attribute name="Class-Path" value="${manifest-classpath-signer} ." /> <!-- class-path  + current directory -->
+			</manifest>
+		</jar>
+
+		<!--  xfrd -->
+		<jar jarfile="${dist}/dnsshim-xfrd.jar">
+			<fileset dir="${build}/" />
+			<manifest>
+				<attribute name="Main-Class"
+					value="br/registro/dnsshim/xfrd/server/XfrdLauncher" />
+				<attribute name="Class-Path" value="${manifest-classpath-xfrd} ." /> <!-- class-path  + current directory -->
+			</manifest>
+		</jar>
+
+		<!-- copy dependencies -->
+		<copy todir="${dist}/lib">
+			<fileset dir="lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+		
+		<copy file="scripts/SlaveSync.sh" todir="${dist}/"/>
+		<copy file="scripts/CreateZoneDirs.sh" todir="${dist}/"/>
+
+	</target>
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+	</target>
+
+	<property name="lib.app.dir" location="lib/" />
+	
+	<!-- building XFRD manifest class-path -->
+	<pathconvert pathsep=" " property="manifest-classpath-xfrd">
+		<map from="${lib.app.dir}" to="lib" /> <!-- to relative path -->
+		<path id="class.path">
+			<fileset dir="lib">
+				<!-- <include name="**/*.jar" /> -->
+				<include name="*log4j*" />
+				<include name="*commons-codec*" />
+			</fileset>
+		</path>
+	</pathconvert>
+
+	<!-- building signer manifest class-path -->
+	<pathconvert pathsep=" " property="manifest-classpath-signer">
+		<map from="${lib.app.dir}" to="lib" /> <!-- to relative path -->
+		<path id="class.path">
+			<fileset dir="lib">
+				<include name="*log4j*" />
+				<include name="*commons-codec*" />
+			</fileset>
+		</path>
+	</pathconvert>
+
+</project>

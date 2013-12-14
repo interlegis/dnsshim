@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:element name="dnsshim" type="dnsshimType" />
+  <xsd:complexType name="dnsshimType">
+    <xsd:sequence>
+      <xsd:element name="request" type="requestType" />
+    </xsd:sequence>
+    <xsd:attribute name="version" type="xsd:decimal" />
+  </xsd:complexType>
+  <xsd:complexType name="requestType">
+    <xsd:choice>
+      <xsd:element name="addSlave" type="SlaveType" />
+ 	    <xsd:element name="removeSlave" type="SlaveType" />
+    </xsd:choice>
+  </xsd:complexType>
+  <xsd:complexType name="SlaveType">
+    <xsd:sequence>
+      <xsd:element name="sessionId" type="xsd:integer" />
+      <xsd:element name="slaveGroup" type="xsd:string" />
+      <xsd:element name="slave" type="xsd:string" />
+      <xsd:element name="port" type="xsd:integer" />
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

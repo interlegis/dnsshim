@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:element name="dnsshim" type="dnsshimType" />
+  <xsd:complexType name="dnsshimType">
+    <xsd:sequence>
+      <xsd:element name="request" type="requestType" />
+    </xsd:sequence>
+    <xsd:attribute name="version" type="xsd:decimal" />
+  </xsd:complexType>
+  <xsd:complexType name="requestType">
+    <xsd:sequence>
+      <xsd:element name="newZone" type="newZoneType" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="newZoneType">
+    <xsd:sequence>
+      <xsd:element name="sessionId" type="xsd:decimal" />
+      <xsd:element name="zone" type="xsd:string" />
+      <xsd:element name="dnssec" type="xsd:int" />
+      <xsd:element name="slaveGroup" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="autoBalance" type="xsd:boolean" minOccurs="0"/>
+      <xsd:element name="soa" type="soaType" />
+      <xsd:element name="key" type="keyType" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="keyType">
+    <xsd:sequence>
+    	<xsd:element name="size" type="xsd:int" />
+    	<xsd:element name="algorithm" type="xsd:string" />
+    	<xsd:element name="expirationPeriod" type="xsd:int" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="soaType">
+    <xsd:sequence>
+      <xsd:element name="ttl" type="xsd:integer" />
+      <xsd:element name="mname" type="xsd:string" />
+      <xsd:element name="rname" type="xsd:string" />
+      <xsd:element name="serial" type="xsd:integer" />
+      <xsd:element name="refresh" type="xsd:integer" />
+      <xsd:element name="retry" type="xsd:integer" />
+      <xsd:element name="expire" type="xsd:integer" />
+      <xsd:element name="minimum" type="xsd:integer" />
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

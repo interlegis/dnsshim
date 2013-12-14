@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:element name="dnsshim" type="dnsshimType" />
+  <xsd:complexType name="dnsshimType">
+    <xsd:sequence>
+      <xsd:element name="request" type="requestType" />
+    </xsd:sequence>
+    <xsd:attribute name="version" type="xsd:decimal" />
+  </xsd:complexType>
+  <xsd:complexType name="requestType">
+    <xsd:choice>
+      <xsd:element name="addRr" type="RrType" />
+ 	    <xsd:element name="removeRr" type="RrType" />
+    </xsd:choice>
+  </xsd:complexType>
+  <xsd:complexType name="RrType">
+    <xsd:sequence>
+      <xsd:element name="sessionId" type="xsd:decimal" />
+      <xsd:element name="zone" type="xsd:string" />
+      <xsd:element name="rr" type="rrType" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="rrType">
+    <xsd:sequence>
+      <xsd:element name="ownername" type="xsd:string" />
+      <xsd:element name="ttl" type="xsd:integer" />
+      <xsd:element name="type" type="xsd:string" />
+      <xsd:element name="dnsClass" type="xsd:string" />
+      <xsd:element name="rdata" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>
