@@ -2,6 +2,7 @@ DNSSHIM: NIC.br's DNS Secure Hidden Master
 
 version 2.2.1
 	* Fix for list-zones and change-password
+	* Added hook to capture a shutdown signal from the Operating System
 
 version 2.2
 	* TLS certificate import fix
