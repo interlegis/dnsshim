@@ -1,5 +1,8 @@
 DNSSHIM: NIC.br's DNS Secure Hidden Master
 
+version 2.2.1
+	* Fix for list-zones and change-password
+
 version 2.2
 	* TLS certificate import fix
 	* overwrite_mname is now an option on xfrd config file

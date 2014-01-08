@@ -82,7 +82,10 @@ public class UserServiceImpl implements UserService {
 	public Response changePassword(ChangePasswordRequest request)
 		throws DnsshimProtocolException {
 		DnsshimSession dnsshimSession = sessionCache.get(request.getSessionId());
-		String username = (String) dnsshimSession.getAttribute("username");
+		
+		User sessionUser = (User) dnsshimSession.getAttribute("user");
+		String username = sessionUser.getUsername();
+		
 		if (!username.equalsIgnoreCase(request.getUsername())) {
 			throw new DnsshimProtocolException(ProtocolStatusCode.INVALID_USER, "Invalid user");
 		}
@@ -102,6 +105,7 @@ public class UserServiceImpl implements UserService {
 		if (logger.isInfoEnabled()) {
 			logger.info("Password changed for user " + username);
 		}
+		
 		Response response = new Response();
 		response.setMsg("Password has been changed");
 		return response;
