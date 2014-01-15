@@ -80,12 +80,14 @@ public class Encoder extends AbstractProtocolEncoder {
 		for (int packetNumber = 0; packetNumber < packets.size(); packetNumber++) {
 			DnsPacket packet = packets.get(packetNumber);
 			
-			short responseLength = (short) DnsMessageUtil.packetLengthWithoutTsig(zonename, packet);
+			// Java does not have unsigned short, but we need it anyway. Using char...
+			char responseLength = (char) DnsMessageUtil.packetLengthWithoutTsig(zonename, packet);
+			
 			// responseLength + tolerance for tsig (1000)
 			ByteBuffer buffer = ByteBuffer.allocate(responseLength + 1000); 
 			
 			if (transport == TransportType.TCP) {
-				buffer.putShort(responseLength);
+				buffer.putChar(responseLength);
 			} else if (transport == TransportType.UDP) {
 				int maxUdpSize = DnsPacket.MAX_UDP_PACKET_SIZE;
 				if (packet.getOpt() != null) {
