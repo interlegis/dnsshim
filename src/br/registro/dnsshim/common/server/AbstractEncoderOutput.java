@@ -36,12 +36,19 @@ public abstract class AbstractEncoderOutput {
 	public void setFilterChain(IoFilterChain filterChain) {
 		this.filterChain = filterChain;
 	}
+	//TODO: check fix
+	public void write(Object message, IoSession session, boolean mayCloseIO) throws DnsshimProtocolException, IOException {		
+		filterChain.setMayCloseIO(mayCloseIO);
 
-	public void write(Object message, IoSession session) throws DnsshimProtocolException, IOException {
 		if (filterChain != null) {
 			filterChain.filter(message, session);
 		}
 		doOutput(message, session);
+	}
+
+	public void write(Object message, IoSession session) throws DnsshimProtocolException, IOException {
+		//TODO: check fix
+		write(message, session, true);
 	}
 	
 	public abstract void doOutput(Object message, IoSession session) throws DnsshimProtocolException, IOException;

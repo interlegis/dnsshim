@@ -63,6 +63,8 @@ public class Encoder extends AbstractProtocolEncoder {
 	public void encode(Object message, IoSession session)
 		throws DnsshimProtocolException, IOException {
 		
+		try {
+
 		DnsMessage dnsMessage = (DnsMessage) message;
 		String zonename = dnsMessage.getZone();
 		TransportType transport = session.getTransportType();
@@ -76,15 +78,15 @@ public class Encoder extends AbstractProtocolEncoder {
 			packets.clear();
 			packets.add(packet);
 		}
-		
+
 		for (int packetNumber = 0; packetNumber < packets.size(); packetNumber++) {
 			DnsPacket packet = packets.get(packetNumber);
 			
 			// Java does not have unsigned short, but we need it anyway. Using char...
 			char responseLength = (char) DnsMessageUtil.packetLengthWithoutTsig(zonename, packet);
-			
+
 			// responseLength + tolerance for tsig (1000)
-			ByteBuffer buffer = ByteBuffer.allocate(responseLength + 1000); 
+			ByteBuffer buffer = ByteBuffer.allocate(responseLength + 1000);
 			
 			if (transport == TransportType.TCP) {
 				buffer.putChar(responseLength);
@@ -193,7 +195,7 @@ public class Encoder extends AbstractProtocolEncoder {
 					} 
 					
 					Tsig tsigResponse = generateTsigResponse(header.getId(), tsigRequest, tsigKey, completeTsig, data);
-								
+
 					inputTsigRecord(buffer, zonename, tsigResponse);
 					buffer.mark();
 					buffer.putShort(positionAdditionalCount, (short) (buffer.getShort(positionAdditionalCount) + 1));
@@ -226,7 +228,18 @@ public class Encoder extends AbstractProtocolEncoder {
 					return;
 				}
 			}
-			getOutput().write(buffer, session);
+			//TODO: check fix
+			getOutput().write(buffer, session, false);
+		}
+		//TODO: check fix
+		}
+		finally {
+
+			EntityManager entityManager = ServerContext.getEntityManager();
+
+			if (entityManager != null && entityManager.isOpen()) {
+				entityManager.close();
+			}
 		}
 	}
 
@@ -290,6 +303,7 @@ public class Encoder extends AbstractProtocolEncoder {
 	}
 	
 	private Tsig generateTsigResponse(short originalId, Tsig tsigRequest, String key, boolean completeTsig, byte[] data) throws InvalidKeyException, NoSuchAlgorithmException {
+
 		long timeSigned = DateUtil.removeMillisFromEpoch(Calendar.getInstance().getTime().getTime());
 		short fudge;
 		
@@ -297,7 +311,7 @@ public class Encoder extends AbstractProtocolEncoder {
 		fudge = config.getTsigFudge();
 												
 		ResponseCode error = tsigRequest.getError(); 							
-				
+
 		byte[] dummyMac = new byte[0];
 		Rdata envelope = RdataTsigBuilder.get(tsigRequest.getAlgorithmName(), timeSigned, fudge, dummyMac, originalId, error, tsigRequest.getOtherData());
 		Tsig dummyTsig = new Tsig(tsigRequest.getOwnername(), envelope);
@@ -313,13 +327,12 @@ public class Encoder extends AbstractProtocolEncoder {
 	@Override
 	public void encodeErrorMessage(ErrorMessage message, IoSession session)
 			throws IOException {
-		
 		EntityManager entityManager = ServerContext.getEntityManager();
-		if (entityManager.getTransaction().isActive()) {
+		if (entityManager != null && entityManager.getTransaction().isActive()) {
 			entityManager.getTransaction().rollback();
 		}
 		
-		if (entityManager.isOpen()) {
+		if (entityManager != null && entityManager.isOpen()) {
 			entityManager.close();
 		}
 		
@@ -329,7 +342,6 @@ public class Encoder extends AbstractProtocolEncoder {
 			return;
 		}
 	
-		
 		DnsPacket dnsPacket = (DnsPacket) attach;
 		EmptyMessageBuilder messageBuilder = new EmptyMessageBuilder();
 		messageBuilder.setRequestPacket(dnsPacket);

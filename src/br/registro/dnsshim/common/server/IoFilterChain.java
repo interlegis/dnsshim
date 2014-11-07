@@ -26,9 +26,18 @@ package br.registro.dnsshim.common.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.registro.dnsshim.xfrd.util.CloseDatabaseSessionFilter;
+
 public class IoFilterChain {
 	private List<IoFilter> filterChain = new ArrayList<IoFilter>();
 	
+	private boolean mayCloseIO = true;
+
+	//TODO: check fix
+	public void setMayCloseIO(boolean mayCloseIO) {
+		this.mayCloseIO = mayCloseIO;
+	}
+
 	public IoFilterChain add(IoFilter filter) {
 		filterChain.add(filter);
 		return this;
@@ -36,6 +45,10 @@ public class IoFilterChain {
 	
 	public void filter(Object message, IoSession session) throws DnsshimProtocolException{
 		for (IoFilter filter : filterChain) {
+			//TODO: check fix
+			if (filter instanceof CloseDatabaseSessionFilter){
+				((CloseDatabaseSessionFilter)filter).setMayClose(mayCloseIO);
+			}
 			filter.filter(message, session);
 		}
 	}

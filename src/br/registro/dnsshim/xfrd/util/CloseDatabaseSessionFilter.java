@@ -12,6 +12,13 @@ public class CloseDatabaseSessionFilter implements IoFilter {
 
 	private static final Logger logger = Logger.getLogger(CloseDatabaseSessionFilter.class);
 
+	private volatile boolean mayClose = true;
+
+	//TODO: check fix
+	public void setMayClose(boolean mayClose) {
+		this.mayClose = mayClose;
+	}
+
 	@Override
 	public void filter(Object message, IoSession session) throws DnsshimProtocolException {
 
@@ -25,9 +32,11 @@ public class CloseDatabaseSessionFilter implements IoFilter {
 		if (entityManager.getTransaction().isActive()) {
 			entityManager.getTransaction().commit();
 		}
-			
-		if (entityManager.isOpen()) {
-			entityManager.close();
+		//TODO: check fix
+		if (mayClose){
+			if (entityManager.isOpen()) {
+				entityManager.close();
+			}
 		}
 	}
 }
