@@ -48,11 +48,8 @@ import br.registro.dnsshim.xfrd.domain.logic.XfrdConfigManager;
 public class SlaveGroupDao {
 	private static final Logger logger = Logger.getLogger(SlaveGroupDao.class);
 
-	public static final String REMOVED_COMMAND_EXTENSION = ".removed.rndc.";
-	private static final String REMOVED_ERROR_EXTENSION = REMOVED_COMMAND_EXTENSION + "err";
-
-	public static final String ADDED_COMMAND_EXTENSION = ".added.rndc.";
-	private static final String ADDED_ERROR_EXTENSION = ADDED_COMMAND_EXTENSION	+ "err";
+	public enum ExtensionType { REMOVED_COMMAND, REMOVED_ERROR, ADDED_COMMAND, ADDED_ERROR};
+	
 	private final String BASE_DIR;
 
 	private EntityManager entityManager;
@@ -86,6 +83,20 @@ public class SlaveGroupDao {
 		}
 
 		BASE_DIR = root.toString();
+	}
+	
+	public String getFileExtension(SlaveGroup slaveGroup, ExtensionType extensionType) {
+		if (extensionType == ExtensionType.ADDED_ERROR) {
+			return ".added." + slaveGroup.getVendor() + ".err";
+		} else if (extensionType == ExtensionType.ADDED_COMMAND) {
+			return ".added." + slaveGroup.getVendor();
+		} else if (extensionType == ExtensionType.REMOVED_ERROR) {
+			return ".removed." + slaveGroup.getVendor() + ".err";
+		} else if (extensionType == ExtensionType.REMOVED_COMMAND) {
+			return ".removed." + slaveGroup.getVendor();
+		}
+		
+		return "";
 	}
 
 	public void save(SlaveGroup slaveGroup) throws IOException {
@@ -156,7 +167,7 @@ public class SlaveGroupDao {
 	}
 
 	private void parseAddedZoneFile(SlaveGroup slaveGroup) throws IOException {
-		String path = buildFilePath(slaveGroup.getName(), ADDED_ERROR_EXTENSION);
+		String path = buildFilePath(slaveGroup.getName(), getFileExtension(slaveGroup, ExtensionType.ADDED_ERROR));
 
 		File file = new File(path);
 		if (file.exists() == false) {
@@ -183,7 +194,7 @@ public class SlaveGroupDao {
 
 	private void parseRemovedZoneFile(SlaveGroup slaveGroup)
 			throws IOException {
-		String path = buildFilePath(slaveGroup.getName(), REMOVED_ERROR_EXTENSION);
+		String path = buildFilePath(slaveGroup.getName(), getFileExtension(slaveGroup, ExtensionType.REMOVED_ERROR));
 		File file = new File(path);
 		if (file.exists() == false) {
 			return;
@@ -222,20 +233,28 @@ public class SlaveGroupDao {
 		StringBuilder addedZones = new StringBuilder();
 		StringBuilder removedZones = new StringBuilder();
 		List<ZoneSync> syncZones = slaveGroup.getSyncZones();
+
 		for (ZoneSync zoneSync : syncZones) {
 			String zonename = zoneSync.getZonename();
 			if (zoneSync.getOperation() == Operation.ADD) {
-				addedZones.append(zonename);
-				addedZones.append(" '{ type slave; masters { ");
-				addedZones.append(localhost.getHostAddress());
-				addedZones.append(" port ");
-				addedZones.append(port);
-				addedZones.append("; }; file \"dnsshim");
-				addedZones.append(File.separatorChar);
-				addedZones.append(FileSystemUtil.hash(zonename));
-				addedZones.append(zonename);
-				addedZones.append("\"; };'");
-				addedZones.append(System.getProperty("line.separator"));			
+				if (slaveGroup.getVendor().equals("bind")) {
+					addedZones.append(zonename);
+					addedZones.append(" '{ type slave; masters { ");
+					addedZones.append(localhost.getHostAddress());
+					addedZones.append(" port ");
+					addedZones.append(port);
+					addedZones.append("; }; file \"dnsshim");
+					addedZones.append(File.separatorChar);
+					addedZones.append(FileSystemUtil.hash(zonename));
+					addedZones.append(zonename);
+					addedZones.append("\"; };'");
+					addedZones.append(System.getProperty("line.separator"));
+				} else if (slaveGroup.getVendor().equals("nsd")) {
+					addedZones.append(zonename);
+					addedZones.append(" ");
+					addedZones.append(FileSystemUtil.hash(zonename));
+					addedZones.append(System.getProperty("line.separator"));
+				}
 			} else {
 				removedZones.append(zonename);
 				removedZones.append(System.getProperty("line.separator"));
@@ -245,7 +264,8 @@ public class SlaveGroupDao {
 		
 		StringBuilder path = new StringBuilder(BASE_DIR);
 		path.append(slaveGroup.getName());
-		path.append(ADDED_COMMAND_EXTENSION);
+		
+		path.append(getFileExtension(slaveGroup, ExtensionType.ADDED_COMMAND));
 		path.append(timestamp);
 		if (addedZones.length() > 0) {
 			File file = new File(path.toString());
@@ -256,7 +276,9 @@ public class SlaveGroupDao {
 
 		path = new StringBuilder(BASE_DIR);
 		path.append(slaveGroup.getName());
-		path.append(REMOVED_COMMAND_EXTENSION);
+		
+		path.append(getFileExtension(slaveGroup, ExtensionType.REMOVED_COMMAND));
+		
 		path.append(timestamp);
 		if (removedZones.length() > 0) {
 			File file = new File(path.toString());

@@ -35,7 +35,7 @@ import br.registro.dnsshim.xfrd.dns.protocol.EncoderOutput;
 import br.registro.dnsshim.xfrd.domain.XfrdConfig;
 import br.registro.dnsshim.xfrd.domain.logic.XfrdConfigManager;
 import br.registro.dnsshim.xfrd.util.CloseDatabaseSessionFilter;
-import br.registro.dnsshim.xfrd.util.OpenDatabaseSessionFilter;
+import br.registro.dnsshim.xfrd.util.OpenDatabaseNoTxSessionFilter;
 
 public class DnsServer implements Runnable {
 
@@ -70,16 +70,16 @@ public class DnsServer implements Runnable {
 
 			decoder.setOutput(decoderOutput);
 			encoder.setOutput(encoderOutput);
-
-			IoFilterChain decoderFilterChain = new IoFilterChain();
-			decoderFilterChain.add(new OpenDatabaseSessionFilter());
 			
+			IoFilterChain decoderFilterChain = new IoFilterChain();
+			decoderFilterChain.add(new OpenDatabaseNoTxSessionFilter());
+			                        
 			IoFilterChain encoderFilterChain = new IoFilterChain();
 			encoderFilterChain.add(new CloseDatabaseSessionFilter());
-			
+			                        
 			decoderOutput.setFilterChain(decoderFilterChain);
 			encoderOutput.setFilterChain(encoderFilterChain);
-			
+
 			server.setDecoder(decoder);
 
 			server.launch();

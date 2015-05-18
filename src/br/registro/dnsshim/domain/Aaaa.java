@@ -28,6 +28,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.validator.routines.InetAddressValidator;
+
 import br.registro.dnsshim.common.server.DnsshimProtocolException;
 import br.registro.dnsshim.common.server.ProtocolStatusCode;
 import br.registro.dnsshim.util.ByteUtil;
@@ -39,6 +41,16 @@ public class Aaaa extends ResourceRecord {
 		throws DnsshimProtocolException {
 		super(ownername, RrType.AAAA, dnsClass, ttl);
 		try {
+			// is a IPv4 ?
+		    if (InetAddressValidator.getInstance().isValid(ipv6)){
+		    	throw new DnsshimProtocolException(ProtocolStatusCode.INVALID_RESOURCE_RECORD, "Invalid IPv6 address: " + ipv6);
+		    }
+		    InetAddress inet = InetAddress.getByName(ipv6);
+		    
+		    if ((inet instanceof Inet6Address) == false) {
+		    	throw new DnsshimProtocolException(ProtocolStatusCode.INVALID_RESOURCE_RECORD, "Invalid IPv6 address: " + ipv6);
+		    }
+		    
 			this.addr = (Inet6Address) InetAddress.getByName(ipv6);
 		} catch (UnknownHostException uhe) {
 			throw new DnsshimProtocolException(ProtocolStatusCode.INVALID_RESOURCE_RECORD, "Invalid IPv6 address: " + ipv6);

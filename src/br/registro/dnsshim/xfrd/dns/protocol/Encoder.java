@@ -76,18 +76,21 @@ public class Encoder extends AbstractProtocolEncoder {
 			packets.clear();
 			packets.add(packet);
 		}
-		
+		String tsigKey = null;
 		for (int packetNumber = 0; packetNumber < packets.size(); packetNumber++) {
 			DnsPacket packet = packets.get(packetNumber);
-			
-			// Java does not have unsigned short, but we need it anyway. Using char...
-			char responseLength = (char) DnsMessageUtil.packetLengthWithoutTsig(zonename, packet);
-			
+			int packetLen = DnsMessageUtil.packetLengthWithoutTsig(zonename, packet);
+			short responseLength;
+			if (packetLen > Short.MAX_VALUE) {
+				responseLength = Short.MAX_VALUE;
+			} else {
+				responseLength = (short)packetLen;
+			}
 			// responseLength + tolerance for tsig (1000)
-			ByteBuffer buffer = ByteBuffer.allocate(responseLength + 1000); 
+			ByteBuffer buffer = ByteBuffer.allocate(packetLen + 10000);
 			
 			if (transport == TransportType.TCP) {
-				buffer.putChar(responseLength);
+				buffer.putShort(responseLength);
 			} else if (transport == TransportType.UDP) {
 				int maxUdpSize = DnsPacket.MAX_UDP_PACKET_SIZE;
 				if (packet.getOpt() != null) {
@@ -167,7 +170,10 @@ public class Encoder extends AbstractProtocolEncoder {
 				String host = remote.getHostAddress();
 				String keyName = DomainNameUtil.trimDot(tsigRequest.getOwnername());
 
-				String tsigKey = TsigCalc.getTsigKey(host, keyName);				
+				if (tsigKey == null) {
+					// to avoid multiple calls to database
+					tsigKey = TsigCalc.getTsigKey(host, keyName);				
+				}
 								
 				try {
 					byte[] data;
@@ -263,6 +269,7 @@ public class Encoder extends AbstractProtocolEncoder {
 		buffer.putInt(record.getTtl());
 		buffer.putShort(record.getRdata().getRdlen());
 		buffer.put(record.getRdata().getData());
+		
 	}
 
 	private void inputOptRecord(ByteBuffer buffer, String zonename, Opt opt) {
@@ -313,13 +320,12 @@ public class Encoder extends AbstractProtocolEncoder {
 	@Override
 	public void encodeErrorMessage(ErrorMessage message, IoSession session)
 			throws IOException {
-		
 		EntityManager entityManager = ServerContext.getEntityManager();
-		if (entityManager.getTransaction().isActive()) {
+		if (entityManager != null && entityManager.getTransaction().isActive()) {
 			entityManager.getTransaction().rollback();
 		}
 		
-		if (entityManager.isOpen()) {
+		if (entityManager != null && entityManager.isOpen()) {
 			entityManager.close();
 		}
 		
@@ -329,7 +335,6 @@ public class Encoder extends AbstractProtocolEncoder {
 			return;
 		}
 	
-		
 		DnsPacket dnsPacket = (DnsPacket) attach;
 		EmptyMessageBuilder messageBuilder = new EmptyMessageBuilder();
 		messageBuilder.setRequestPacket(dnsPacket);

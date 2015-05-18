@@ -22,12 +22,7 @@
 		<copy todir="${build}" >
 		    <fileset dir="${src}">
 		    	<include name="**/resources/**" />
-		    </fileset>
-		</copy>
-	    <copy todir="${build}/META-INF">
-			<fileset dir="${src}/META-INF">
-				<include name="*" />
-			</fileset>
+		    </fileset>	
 		</copy>
 	</target>
 	
@@ -40,7 +35,8 @@
 		<!--  signer -->
 		<jar jarfile="${dist}/dnsshim-signer.jar">
 			<fileset dir="${build}/" excludes="**/xfrd/" />
-		    <manifest>
+		    
+			<manifest>
 				<attribute name="Main-Class"
 					value="br/registro/dnsshim/signer/server/SignerServer" />
 				<attribute name="Class-Path" value="${manifest-classpath-signer} ." /> <!-- class-path  + current directory -->
@@ -64,9 +60,9 @@
 			</fileset>
 		</copy>
 		
-		<copy file="scripts/SlaveSync.sh" todir="${dist}/"/>
+		<copy file="scripts/BindSync.sh" todir="${dist}/"/>
+		<copy file="scripts/NSDSync.sh" todir="${dist}/"/>
 		<copy file="scripts/CreateZoneDirs.sh" todir="${dist}/"/>
-		<copy file="ChangeLog" todir="${dist}/"/>
 
 	</target>
 
@@ -83,7 +79,9 @@
 		<map from="${lib.app.dir}" to="lib" /> <!-- to relative path -->
 		<path id="class.path">
 			<fileset dir="lib">
-				<include name="**/*.jar" />
+				<!-- <include name="**/*.jar" /> -->
+				<include name="*log4j*" />
+				<include name="*commons-codec*" />
 			</fileset>
 		</path>
 	</pathconvert>
@@ -93,7 +91,8 @@
 		<map from="${lib.app.dir}" to="lib" /> <!-- to relative path -->
 		<path id="class.path">
 			<fileset dir="lib">
-				<include name="**/*.jar" />
+				<include name="*log4j*" />
+				<include name="*commons-codec*" />
 			</fileset>
 		</path>
 	</pathconvert>

@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 @SuppressWarnings("serial")
 public abstract class CacheStrategy<K, V extends Cacheable<K>> {
 	private final Logger logger = Logger.getLogger(this.getClass());// pera pegar a subclasse
+	private int hits, misses;
 	
 	// Least Recently Used (LRU): discards the least recently used items first.
 	private final Map<K,V> cache = new LinkedHashMap<K,V>(getMaxEntriesInCache(), 0.75F, true) {
@@ -44,10 +45,6 @@ public abstract class CacheStrategy<K, V extends Cacheable<K>> {
 			return this.size() > getMaxEntriesInCache();
 		}
 	};
-	
-	protected Map<K,V> getCache() {
-		return cache;
-	}
 	
 	public synchronized V remove(K k) {
 		if (logger.isTraceEnabled()) {
@@ -64,9 +61,22 @@ public abstract class CacheStrategy<K, V extends Cacheable<K>> {
 		}
 	}
 	
+	public void logStats() {
+		String msg = String.format("cache stats - %s - hits %d - misses %d - size %d - max %d",
+				this.getClass().getSimpleName(),
+				hits,
+				misses,
+				cache.size(),
+				getMaxEntriesInCache());
+		logger.info(msg);
+		hits = 0;
+		misses = 0;
+	}
+	
 	public synchronized V get(K k) {
 		V cached = cache.get(k);
 		if (cached == null) {
+			misses++;
 			if (logger.isTraceEnabled()) {
 				logger.trace("Object not found in cache. Asking cache strategy...");
 			}
@@ -83,6 +93,7 @@ public abstract class CacheStrategy<K, V extends Cacheable<K>> {
 			}
 			return value;
 		} else {
+			hits++;
 			if (logger.isTraceEnabled()) {
 				logger.trace("Object found in cache.");
 			}

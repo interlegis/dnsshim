@@ -67,14 +67,14 @@ public class DecoderOutput extends AbstractDecoderOutput {
 		DnsMessage request = (DnsMessage) message;
 		DnsPacket dnsPacket = request.getFirstPacket();
 		DnsQuestion question = dnsPacket.getQuestion();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Got query: " + question);
-		}
-
 		DnsPacket firstPacket = request.getFirstPacket();
 		QueryType queryType = firstPacket.getQuestion().getQtype();
 		InetAddress remote = session.getRemoteAddress().getAddress();
 		String hostAddress = remote.getHostAddress();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Got query: " + question + " from " + hostAddress);
+		}
+
 		if (firstPacket.getHeader().isQuestion() && 
 				(queryType == QueryType.AXFR || queryType == QueryType.IXFR) &&
 				firstPacket.getTsig() == null) {			
@@ -243,12 +243,7 @@ public class DecoderOutput extends AbstractDecoderOutput {
 		case BADTIME:
 			logger.warn("TSIG time check error from '" + hostAddress);
 			break;
-
-		case NOERROR:
-			if (logger.isDebugEnabled()) {
-				logger.debug("TSIG no error from '" + hostAddress);
-				}
-			
+		
 		default:
 			break;
 		}

@@ -31,6 +31,8 @@ import java.util.Scanner;
 import br.registro.dnsshim.common.server.DnsshimProtocolException;
 import br.registro.dnsshim.common.server.ProtocolStatusCode;
 import br.registro.dnsshim.util.DomainNameUtil;
+import br.registro.dnsshim.xfrd.domain.XfrdConfig;
+import br.registro.dnsshim.xfrd.domain.logic.XfrdConfigManager;
 
 public class Soa extends ResourceRecord {
 
@@ -49,12 +51,27 @@ public class Soa extends ResourceRecord {
 		this.mname = mname.toLowerCase();
 		this.rname = rname.toLowerCase();
 		this.serial = serial;
-		this.refresh = refresh;
+		
+		// Refresh minimum
+		XfrdConfig config = XfrdConfigManager.getInstance();
+		if (refresh < config.getMinimumSOARefresh()) {
+			this.refresh = config.getMinimumSOARefresh();		
+		} else {
+			this.refresh = refresh;
+		}
+		
 		this.retry = retry;
-		this.expire = expire;
+		
+		// Expire minimum
+		if (expire < config.getMinimumSOAExpire()) {
+			this.expire = config.getMinimumSOAExpire();
+		} else {
+			this.expire = expire;
+		}
+		
 		this.minimum = minimum;
 		this.rdata = RdataSoaBuilder.get(this.mname,	this.rname,
-				serial, refresh, retry, expire, minimum);
+				this.serial, this.refresh, this.retry, this.expire, this.minimum);
 	}
 	
 	

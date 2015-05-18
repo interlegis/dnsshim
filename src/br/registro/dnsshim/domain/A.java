@@ -28,6 +28,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.validator.routines.InetAddressValidator;
+
 import br.registro.dnsshim.common.server.DnsshimProtocolException;
 import br.registro.dnsshim.common.server.ProtocolStatusCode;
 import br.registro.dnsshim.util.ByteUtil;
@@ -39,6 +41,9 @@ public class A extends ResourceRecord {
 		throws DnsshimProtocolException {
 		super(ownername, RrType.A, dnsClass, ttl);
 		try {
+			if (InetAddressValidator.getInstance().isValid(ip) == false) {
+				throw new DnsshimProtocolException(ProtocolStatusCode.INVALID_RESOURCE_RECORD, "Invalid IPv4 address: " + ip);
+			}
 			this.addr = (Inet4Address) InetAddress.getByName(ip);
 		} catch (UnknownHostException uhe) {
 			throw new DnsshimProtocolException(ProtocolStatusCode.INVALID_RESOURCE_RECORD, "Invalid IPv4 address: " + ip);

@@ -28,8 +28,8 @@ public class DatabaseUtil {
 	public static void printStatistics() {
 		if (entityManagerFactory != null) {
 			EntityManagerFactoryImpl empImpl = (EntityManagerFactoryImpl) entityManagerFactory;
-			if (logger.isDebugEnabled()) {
-				logger.debug(empImpl.getSessionFactory().getStatistics());
+			if (logger.isInfoEnabled()) {
+				logger.info(empImpl.getSessionFactory().getStatistics());
 			}
 		}
 	}

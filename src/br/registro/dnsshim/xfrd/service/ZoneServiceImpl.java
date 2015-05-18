@@ -286,10 +286,7 @@ public class ZoneServiceImpl implements ZoneService {
 		ListZonesResponse response = new ListZonesResponse();
 		DnsshimSessionCache dnsshimSessionCache = DnsshimSessionCache.getInstance();
 		DnsshimSession session = dnsshimSessionCache.get(request.getSessionId());
-		
-		User user = (User) session.getAttribute("user");
-		String username = user.getUsername();
-		
+		String username = (String) session.getAttribute("username");
 		List<ZoneInfo> zones = zoneInfoDao.findByUser(username);
 		for (ZoneInfo zone : zones) {
 			response.addZonename(zone.getZonename());

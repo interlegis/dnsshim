@@ -151,7 +151,7 @@ class Notifier implements Callable<ZoneNotify> {
 	@Override
 	public ZoneNotify call() throws Exception {
 		NotifierClient client = new NotifierClient();
-		DnsMessage request = client.buildNotifyMessage(zoneNotify.getZonename());
+		DnsMessage request = client.buildNotifyMessage(zoneNotify.getZonename(), zoneNotify.getSoa());
 		if (logger.isInfoEnabled()) {
 			logger.info("Sending notify #"+zoneNotify.getNotifySent()+
 					" for zone " + zoneNotify.getZonename() +

@@ -47,17 +47,20 @@ public class XfrdConfig {
 	public static final int DEFAULT_NOTIFY_TIMEOUT = 5; // 5 seconds
 	public static final int DEFAULT_NOTIFY_RETRY_INTERVAL = 300; // 300 seconds
 	public static final int DEFAULT_NOTIFY_MAX_RETRIES = 5; // 5 times
-	public static final String DEFAULT_SLAVESYNC_PATH = "./SlaveSync.sh";
-	public static final String DEFAULT_RNDC_PATH = "/usr/sbin/rndc";
-	public static final int DEFAULT_RNDC_PORT = 953;
+	public static final String DEFAULT_BINDSYNC_PATH = "./BindSync.sh";
+	public static final String DEFAULT_NSDSYNC_PATH = "./NSDSync.sh";
 	public static final int DEFAULT_CACHE_SIZE = 2000;
 	public static final String DEFAULT_SHUTDOWN_SECRET = "";
-	
+	public static final int DEFAULT_MINIMUM_SOA_REFRESH = 86400; // 1 DAYS
+	public static final int DEFAULT_MINIMUM_SOA_EXPIRE= 604800; // 7 DAYS
+
 	private short tsigFudge = DEFAULT_TSIG_FUDGE;
 	private int schedulerLowLimit = DEFAULT_SCHEDULER_LOW_LIMIT; // low priority
 	private int schedulerHighLimit = DEFAULT_SCHEDULER_HIGH_LIMIT; // high priority
 	private int slaveSyncPeriod = DEFAULT_SLAVE_SYNC_PERIOD;
-	private String slaveSyncPath = DEFAULT_SLAVESYNC_PATH;
+	private String bindSyncPath = DEFAULT_BINDSYNC_PATH;
+	private String nsdSyncPath = DEFAULT_NSDSYNC_PATH;
+
 	private boolean slaveSyncEnabled = true;
 	private boolean overwriteMname = false;
 	
@@ -65,13 +68,13 @@ public class XfrdConfig {
 	private int notifyRetryInterval;
 	private int notifyMaxRetries;
 	
-	private String rndcPath = DEFAULT_RNDC_PATH;
-	private int rndcPort = DEFAULT_RNDC_PORT;
-	
 	private int cacheSize = DEFAULT_CACHE_SIZE;
 
 	private String shutdownSecret = DEFAULT_SHUTDOWN_SECRET;
-	
+
+	private int minimumSOARefresh = DEFAULT_MINIMUM_SOA_REFRESH;
+	private int minimumSOAExpire= DEFAULT_MINIMUM_SOA_EXPIRE;
+
 	private Map<String, String> databaseProperties;
 		
 	public XfrdConfig() {
@@ -137,14 +140,21 @@ public class XfrdConfig {
 		this.slaveSyncPeriod = slaveSyncPeriod;
 	}
 
-	public String getSlaveSyncPath() {
-		return slaveSyncPath;
+	public String getBindSyncPath() {
+		return bindSyncPath;
 	}
 
-	public void setSlaveSyncPath(String slaveSyncPath) {
-		this.slaveSyncPath = slaveSyncPath;
+	public void setBindSyncPath(String bindSyncPath) {
+		this.bindSyncPath = bindSyncPath;
+	}
+	
+	public String getNsdSyncPath() {
+		return nsdSyncPath;
 	}
 
+	public void setNsdSyncPath(String nsdSyncPath) {
+		this.nsdSyncPath = nsdSyncPath;
+	}
 
 	public boolean isSlaveSyncEnabled() {
 		return slaveSyncEnabled;
@@ -152,22 +162,6 @@ public class XfrdConfig {
 
 	public void setSlaveSyncEnabled(boolean slaveSyncEnabled) {
 		this.slaveSyncEnabled = slaveSyncEnabled;
-	}
-
-	public String getRndcPath() {
-		return rndcPath;
-	}
-
-	public void setRndcPath(String rndcPath) {
-		this.rndcPath = rndcPath;
-	}
-
-	public int getRndcPort() {
-		return rndcPort;
-	}
-
-	public void setRndcPort(int rndcPort) {
-		this.rndcPort = rndcPort;
 	}
 
 	public int getNotifyTimeout() {
@@ -208,6 +202,22 @@ public class XfrdConfig {
 
 	public void setShutdownSecret(String shutdownSecret) {
 		this.shutdownSecret = shutdownSecret;
+	}
+
+	public int getMinimumSOARefresh() {
+		return minimumSOARefresh;
+	}
+
+	public void setMinimumSOARefresh(int minimumSOARefresh) {
+		this.minimumSOARefresh = minimumSOARefresh;
+	}
+
+	public int getMinimumSOAExpire() {
+		return minimumSOAExpire;
+	}
+
+	public void setMinimumSOAExpire(int minimumSOAExpire) {
+		this.minimumSOAExpire = minimumSOAExpire;
 	}
 
 	public Map<String, String> getDatabaseProperties() {

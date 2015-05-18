@@ -233,7 +233,7 @@ public class PublicationServiceImpl implements PublicationService {
 		zonePrePubCache.put(newZonePrePublish);
 
 		// Send notifies
-		sendNotifies(zoneInfo);
+		sendNotifies(zoneInfo, zone.getSoa());
 
 		// Schedule resigning of the zone
 		resignScheduler(zoneInfo);
@@ -241,7 +241,7 @@ public class PublicationServiceImpl implements PublicationService {
 		return newSoaVersion;
 	}
 	
-	private void sendNotifies(ZoneInfo zoneInfo) {
+	private void sendNotifies(ZoneInfo zoneInfo, Soa soa) {
 		NotifierManager.clear(zoneInfo.getZonename());
 
 		for (SlaveGroup slaveGroup: zoneInfo.getSlaveGroups()) {
@@ -251,6 +251,7 @@ public class PublicationServiceImpl implements PublicationService {
 				notify.setZonename(zoneInfo.getZonename());
 				notify.setSlaveAddress(slave.getAddress());
 				notify.setSlavePort(slave.getPort());
+				notify.setSoa(soa);
 				Random random = new Random();
 				int id = random.nextInt(65534) + 1;
 				notify.setQueryId((short) id);
