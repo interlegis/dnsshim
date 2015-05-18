@@ -71,7 +71,7 @@ public class ZoneInfoDao {
 				"WHERE z.expirationDate <= :limit OR z.resignDate <= :now " +
 				"ORDER BY z.expirationDate ASC";
 		Query query = entityManager.createQuery(sql);
-		query.setMaxResults(1000);
+		query.setMaxResults(3000);
 		query.setParameter("limit", dateLimit);
 		query.setParameter("now", Calendar.getInstance().getTime());
 		return query.getResultList();

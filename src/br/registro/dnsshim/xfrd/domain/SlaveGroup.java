@@ -65,6 +65,16 @@ public class SlaveGroup implements Cacheable<String> {
 	@MapKey(name="zonename")
 	private Map<String, ZoneSync> syncZones = new ConcurrentHashMap<String, ZoneSync>();
 	
+	private String vendor;
+	
+	public String getVendor() {
+		return vendor;
+	}
+
+	public void setVendor(String vendor) {
+		this.vendor = vendor;
+	}
+
 	public String getName() {
 		return name;
 	}

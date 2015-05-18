@@ -120,11 +120,12 @@ public class SlaveGroupServiceImpl implements SlaveGroupService {
 		
 		slaveGroup = new SlaveGroup();
 		slaveGroup.setName(request.getGroupName());
+		slaveGroup.setVendor(request.getVendor());
 		
 		slaveGroupDao.save(slaveGroup);
 		
 		if (logger.isInfoEnabled()) {
-			logger.info("New slavegroup " + slaveGroup.getName() + " created");
+			logger.info("New slavegroup " + slaveGroup.getName() + "(" + slaveGroup.getVendor()+")" + " created");
 		}
 		return new SlaveResponse();
 	}
@@ -158,9 +159,12 @@ public class SlaveGroupServiceImpl implements SlaveGroupService {
 		response.setSlaveGroup(slaveGroupName);
 
 		SlaveGroup slaveGroup = slaveGroupDao.findByName(response.getSlaveGroup());
+		
 		if (slaveGroup == null) {
 			throw new DnsshimProtocolException(ProtocolStatusCode.SLAVE_GROUP_NOT_FOUND, "Slave group does not exist");
 		}
+		
+		response.setVendor(slaveGroup.getVendor());
 		
 		for (Slave slave: slaveGroup.getSlaves()) {
 			response.addSlave(slave);

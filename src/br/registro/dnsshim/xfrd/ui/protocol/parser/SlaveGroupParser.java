@@ -76,6 +76,8 @@ public class SlaveGroupParser extends UiRequestParser {
 		String sessionId = null;
 		String groupName = "";
 		String zonename = "";
+		String vendor = "";
+		
 		NodeList childNodes = requestNode.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node childNode = childNodes.item(i);
@@ -90,12 +92,19 @@ public class SlaveGroupParser extends UiRequestParser {
 				zonename = childNode.getFirstChild().getNodeValue();
 			} else if (nodeName.equals("sessionId")) {
 				sessionId = childNode.getFirstChild().getNodeValue();
+			} else if (nodeName.equals("vendor")) {
+				if (childNode.hasChildNodes() == false) {
+					vendor = "bind"; // ??? we should use bind as default ?
+				} else {
+					vendor = childNode.getFirstChild().getNodeValue();
+				}
 			}
 		}
 		
 		SlaveGroupRequest request = new SlaveGroupRequest();
 		request.setOperation(this.operation);
 		request.setGroupName(groupName);
+		request.setVendor(vendor);
 		if (operation == SlaveOperation.ASSIGN ||
 				operation == SlaveOperation.UNASSIGN) {
 			request.setZone(zonename);

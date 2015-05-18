@@ -29,12 +29,8 @@ import br.registro.dnsshim.xfrd.domain.Slave;
 
 public class PrintSlaveGroupResponse extends Response {
 	private String slaveGroupName;
-	private ArrayList<Slave> slaves;
-	
-	public PrintSlaveGroupResponse() {
-		slaveGroupName = "";
-		slaves = new ArrayList<Slave>();
-	}
+	private String vendor;
+	private ArrayList<Slave> slaves = new ArrayList<Slave>();
 	
 	public String getSlaveGroup() {
 		return slaveGroupName;
@@ -51,5 +47,13 @@ public class PrintSlaveGroupResponse extends Response {
 	
 	public void addSlave(Slave slave) {
 		slaves.add(slave);
+	}
+
+	public String getVendor() {
+		return vendor;
+	}
+
+	public void setVendor(String vendor) {
+		this.vendor = vendor;
 	}
 }

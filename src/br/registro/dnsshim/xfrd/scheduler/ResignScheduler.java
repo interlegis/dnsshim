@@ -28,9 +28,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,7 +43,6 @@ import br.registro.dnsshim.xfrd.domain.ZoneInfo;
 import br.registro.dnsshim.xfrd.domain.logic.XfrdConfigManager;
 import br.registro.dnsshim.xfrd.service.PublicationService;
 import br.registro.dnsshim.xfrd.service.PublicationServiceImpl;
-import br.registro.dnsshim.xfrd.ui.protocol.PubZoneResponse;
 import br.registro.dnsshim.xfrd.util.ServerContext;
 
 public class ResignScheduler implements Runnable {
@@ -55,7 +51,6 @@ public class ResignScheduler implements Runnable {
 	private static final double WAIT_COMPUTE_RATIO = 90/10;
 	private static final int NUM_THREADS = (int) (NUM_CPU * CPU_UTILIZATION * (1 + WAIT_COMPUTE_RATIO));
 	private static final ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS);
-	private final CompletionService<PubZoneResponse> completionService = new ExecutorCompletionService<PubZoneResponse>(executorService);
 	
 	private static final int SLEEP_INTERVAL = 180 * 1000; // 180 seconds
 	private static final Logger logger = Logger.getLogger(ResignScheduler.class);
@@ -84,7 +79,7 @@ public class ResignScheduler implements Runnable {
 				ZoneInfoDao zoneInfoDao = new ZoneInfoDao(em);				
 				List<ZoneInfo> zoneInfos = zoneInfoDao.findAllExpired(highPriorityBoudary);
 				for (ZoneInfo zoneInfo : zoneInfos) {
-					completionService.submit(new Resigner(zoneInfo.getZonename()));
+					executorService.execute(new Resigner(zoneInfo.getZonename()));
 				}				
 				
 				if (Thread.interrupted()) {
@@ -110,7 +105,7 @@ public class ResignScheduler implements Runnable {
 	}
 }
 
-class Resigner implements Callable<PubZoneResponse> {
+class Resigner implements Runnable {
 	private String zonename;
 	private static final Logger logger = Logger.getLogger(Resigner.class);
 
@@ -119,15 +114,14 @@ class Resigner implements Callable<PubZoneResponse> {
 	}
 
 	@Override
-	public PubZoneResponse call() {
+	public void run() {
 		EntityManager entityManager = DatabaseUtil.getInstance();
 		ServerContext.setEntityManager(entityManager);
 		entityManager.getTransaction().begin();
 		PublicationService service = new PublicationServiceImpl();
 		try {
-			PubZoneResponse response = service.full(zonename, 0);
+			service.full(zonename, 0);
 			entityManager.getTransaction().commit();
-			return response;
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			entityManager.getTransaction().rollback();
@@ -142,6 +136,5 @@ class Resigner implements Callable<PubZoneResponse> {
 				entityManager.close();
 			}
 		}
-		return null;
 	}
 }

@@ -1,11 +1,18 @@
 DNSSHIM: NIC.br's DNS Secure Hidden Master
 
-version 2.2.2
-	* Fix to allow AXFR responses bigger than 32767 bytes
+version 2.5
+	* big zones (+64k) transfers fixed 
 
-version 2.2.1
-	* Fix for list-zones and change-password
-	* Added hook to capture a shutdown signal from the Operating System
+version 2.4
+    * NSD support
+    * New config parameter: minimun_soa_refresh
+    * New config parameter: minimun_soa_expire
+    * Include SOA RR as a hint in notify messages
+    Bug Fixes:
+    * Fixed command for changing user password
+    
+version 2.3
+	* Memory leak fixed
 
 version 2.2
 	* TLS certificate import fix

@@ -25,6 +25,7 @@ package br.registro.dnsshim.xfrd.server;
 
 import java.io.File;
 
+import org.apache.log4j.AsyncAppender;
 import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -40,6 +41,7 @@ import br.registro.dnsshim.xfrd.dns.server.DnsServer;
 import br.registro.dnsshim.xfrd.domain.logic.DnsshimSessionCollectorManager;
 import br.registro.dnsshim.xfrd.domain.logic.SlaveGroupDumperManager;
 import br.registro.dnsshim.xfrd.scheduler.ResignScheduler;
+import br.registro.dnsshim.xfrd.ui.server.CacheStatsDumper;
 import br.registro.dnsshim.xfrd.ui.server.UiServer;
 
 public class XfrdLauncher {
@@ -57,13 +59,23 @@ public class XfrdLauncher {
 			// No appenders means log4j is not initialized!
 			rootLogger.setLevel(Level.INFO);
 			DailyRollingFileAppender appender = new DailyRollingFileAppender();
+			appender.setBufferedIO(true); // default buffer of 1024*8 bytes
+			appender.setImmediateFlush(false); //will queue up to 1024 bytes to be sent off 
 			appender.setName("xfrd-appender");
-			appender.setLayout(new PatternLayout("%d [%t] %-5p (%13F:%L) - %m%n"));
+			appender.setLayout(new PatternLayout("%d [%t] %-5p - %m%n"));
 			appender.setFile("dnsshim-xfrd.log");
 			appender.setDatePattern("'.'yyyy-MM-dd'.log'");
 			appender.activateOptions();
-			rootLogger.addAppender(appender);	
+			
+			// only one I/O thread
+			AsyncAppender asyncAppender = new AsyncAppender();  
+			asyncAppender.addAppender(appender);
+			
+			rootLogger.addAppender(asyncAppender);	
 		}
+		
+		Thread cacheStats = new Thread(new CacheStatsDumper());
+		cacheStats.start();
 		
 		Thread dnsServerTcp = new Thread(new DnsServer(TransportType.TCP), "dns_server_tcp");
 		dnsServerTcp.start();
@@ -79,30 +91,16 @@ public class XfrdLauncher {
 		SlaveGroupDumperManager.launch();
 		DnsshimSessionCollectorManager.launch();
 		
-		final Thread mainThread = Thread.currentThread();
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-		    public void run() {
-		        SHUTDOWN = true;
-		        try {
-		        	logger.info("Shutdown signal received");
-		        	mainThread.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		    }
-		});
-		
 		while (SHUTDOWN == false) {
 			try {
 				Thread.sleep(5000);
-				DatabaseUtil.printStatistics();
 				HealthMonitor.findDeadLocks();
 			} catch (InterruptedException e) {
 				logger.error(e.getMessage(), e);
 			}
 		}
 		resignScheduler.interrupt();
+		cacheStats.interrupt();
 		shutdown();
 	}
 	

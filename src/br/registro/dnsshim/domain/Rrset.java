@@ -47,18 +47,6 @@ public class Rrset implements Comparable<Rrset> {
 		this.dnsClass = dnsClass;
 	}
 
-	public Rrset(Rrset rrset) {
-		if (rrset == null) {
-			throw new IllegalArgumentException();
-		}
-		
-		this.ownername = rrset.ownername;
-		this.type = rrset.type;
-		this.dnsClass = rrset.dnsClass;
-		
-		records = new TreeSet<ResourceRecord>(rrset.records);
-	}
-	
 	public String getOwnername() {
 		return ownername;
 	}

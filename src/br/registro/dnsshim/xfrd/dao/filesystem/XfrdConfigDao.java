@@ -107,13 +107,11 @@ public class XfrdConfigDao {
 		
 		String slaveSyncPeriod = conf.getProperty("slave_sync_period", String.valueOf(XfrdConfig.DEFAULT_SLAVE_SYNC_PERIOD));
 		
-		String rndcPath = conf.getProperty("rndc_path", XfrdConfig.DEFAULT_RNDC_PATH);
-		String rndcPort = conf.getProperty("rndc_port", String.valueOf(XfrdConfig.DEFAULT_RNDC_PORT));
-		
 		String uiCaPath = conf.getProperty("ui_cert_file", XfrdConfig.DEFAULT_CA_PATH);
 		String uiCaPassword = conf.getProperty("ui_cert_password", XfrdConfig.DEFAULT_CA_PASSWD);
 		String uiPort = conf.getProperty("ui_port", String.valueOf(XfrdConfig.DEFAULT_UI_PORT));
-		String slaveSyncPath = conf.getProperty("slavesync_path", XfrdConfig.DEFAULT_SLAVESYNC_PATH);
+		String bindSyncPath = conf.getProperty("bind_sync_path", XfrdConfig.DEFAULT_BINDSYNC_PATH);
+		String nsdSyncPath = conf.getProperty("nsd_sync_path", XfrdConfig.DEFAULT_NSDSYNC_PATH);
 		boolean slaveSyncEnabled = Boolean.parseBoolean(conf.getProperty("slave_sync_enabled", "true"));
 		
 		String notifyTimeout = conf.getProperty("notify_timeout", String.valueOf(XfrdConfig.DEFAULT_NOTIFY_TIMEOUT));
@@ -123,7 +121,9 @@ public class XfrdConfigDao {
 		String cacheSize = conf.getProperty("cache_size", String.valueOf(XfrdConfig.DEFAULT_CACHE_SIZE));
 		
 		String shutdownSecret = conf.getProperty("shutdown_secret", XfrdConfig.DEFAULT_SHUTDOWN_SECRET);
-		
+		String minimumSOARefresh = conf.getProperty("minimum_soa_refresh", String.valueOf(XfrdConfig.DEFAULT_MINIMUM_SOA_REFRESH));
+		String minimumSOAExpire= conf.getProperty("minimum_soa_expire", String.valueOf(XfrdConfig.DEFAULT_MINIMUM_SOA_EXPIRE));
+
 		boolean overwriteMname = Boolean.parseBoolean(conf.getProperty("overwrite_mname", "false"));
 		
 		String databaseDialect = conf.getProperty("database_dialect");
@@ -160,9 +160,8 @@ public class XfrdConfigDao {
 		config.setSchedulerLowLimit(Integer.parseInt(schedulerLowPriority));
 		config.setSchedulerHighLimit(Integer.parseInt(schedulerHighPriority));
 		config.setSlaveSyncPeriod(Integer.parseInt(slaveSyncPeriod));
-		config.setSlaveSyncPath(slaveSyncPath);
-		config.setRndcPath(rndcPath);
-		config.setRndcPort(Integer.parseInt(rndcPort));
+		config.setBindSyncPath(bindSyncPath);
+		config.setNsdSyncPath(nsdSyncPath);
 		config.setSlaveSyncEnabled(slaveSyncEnabled);
 		
 		config.setNotifyTimeout(Integer.parseInt(notifyTimeout));
@@ -171,7 +170,9 @@ public class XfrdConfigDao {
 		
 		config.setCacheSize(Integer.parseInt(cacheSize));
 		config.setShutdownSecret(shutdownSecret);
-		
+		config.setMinimumSOARefresh(Integer.parseInt(minimumSOARefresh));
+		config.setMinimumSOAExpire(Integer.parseInt(minimumSOAExpire));
+
 		config.setOverwriteMname(overwriteMname);
 		
 		Map<String, String> databaseProperties = new HashMap<String, String>();
@@ -219,9 +220,8 @@ public class XfrdConfigDao {
 		conf.put("scheduler_high_priority", String.valueOf(config.getSchedulerHighLimit()));
 		conf.put("ui_cert_file",uiConfig.getCaPath());
 		conf.put("ui_cert_password",uiConfig.getCaPasswd());
-		conf.put("slavesync_path", config.getSlaveSyncPath());
-		conf.put("rndc_path", config.getRndcPath());
-		conf.put("rndc_port", String.valueOf(config.getRndcPort()));
+		conf.put("bind_sync_path", config.getBindSyncPath());
+		conf.put("nsd_sync_path", config.getNsdSyncPath());
 		conf.put("slave_sync_period", String.valueOf(config.getSlaveSyncPeriod()));
 		conf.put("slave_sync_enabled", String.valueOf(config.isSlaveSyncEnabled()));
 		conf.put("listen_address", dnsConfig.getListenAddress());
@@ -230,6 +230,9 @@ public class XfrdConfigDao {
 		conf.put("notify_max_retries", String.valueOf(config.getNotifyMaxRetries()));
 		conf.put("cache_size", String.valueOf(config.getCacheSize()));
 		conf.put("shutdown_secret", config.getShutdownSecret());
+		conf.put("minimum_soa_refresh", String.valueOf(config.getMinimumSOARefresh()));
+		conf.put("minimum_soa_expire", String.valueOf(config.getMinimumSOAExpire()));
+
 		conf.put("overwrite_mname", String.valueOf(config.getOverwriteMname()));
 
 		Map<String, String> databaseProperties = config.getDatabaseProperties();

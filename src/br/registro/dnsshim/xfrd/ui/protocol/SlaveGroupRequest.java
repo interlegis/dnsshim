@@ -29,11 +29,14 @@ public class SlaveGroupRequest extends RestrictOperation {
 	private SlaveOperation operation;
 	private String zone;
 	private String groupName;
+	private String vendor;
 	
-	
-	public SlaveGroupRequest() {
-		zone = "";
-		groupName = "";
+	public String getVendor() {
+		return vendor;
+	}
+
+	public void setVendor(String vendor) {
+		this.vendor = vendor;
 	}
 
 	public SlaveOperation getOperation() {

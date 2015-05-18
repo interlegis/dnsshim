@@ -30,6 +30,7 @@ import java.net.InetSocketAddress;
 import br.registro.dnsshim.common.server.DnsshimProtocolException;
 import br.registro.dnsshim.common.server.UdpClientIoSession;
 import br.registro.dnsshim.domain.DnsClass;
+import br.registro.dnsshim.domain.Soa;
 import br.registro.dnsshim.xfrd.dns.protocol.ClientDecoderOutput;
 import br.registro.dnsshim.xfrd.dns.protocol.Decoder;
 import br.registro.dnsshim.xfrd.dns.protocol.DnsHeader;
@@ -75,7 +76,12 @@ public class NotifierClient {
 		return (DnsMessage) clientDecoderOutput.getResponse();
 	}
 
-	public DnsMessage buildNotifyMessage(String zonename) {
+	public DnsMessage buildNotifyMessage(String zonename, Soa soa) {
+		short answerCounter = ZERO;
+		if (soa != null) {
+			answerCounter = (short)1;
+		}
+		
 		DnsPacket packet = new DnsPacket();
 		
 		DnsHeader header = new DnsHeader();		
@@ -87,7 +93,7 @@ public class NotifierClient {
 		header.setRecursionAvailable(false);
 		header.setResponseCode(ResponseCode.NOERROR);
 		header.setQuestionCount((short) 1);
-		header.setAnswerCount(ZERO);
+		header.setAnswerCount(answerCounter);
 		header.setAuthorityCount(ZERO);
 		header.setAdditionalCount(ZERO);
 		packet.setHeader(header);
@@ -96,7 +102,11 @@ public class NotifierClient {
 		question.setQname(zonename);
 		question.setQclass(DnsClass.IN);
 		question.setQtype(QueryType.SOA);
+		
 		packet.setQuestion(question);
+		if (soa != null) {
+			packet.addAnswer(soa);
+		}
 		
 		DnsMessage request = new DnsMessage();
 		request.setZone(zonename);

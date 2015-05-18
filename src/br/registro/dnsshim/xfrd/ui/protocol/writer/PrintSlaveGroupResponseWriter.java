@@ -67,6 +67,11 @@ public class PrintSlaveGroupResponseWriter extends UiResponseWriter<PrintSlaveGr
 		writer.writeStartElement("slaveGroup");
 		writer.writeCharacters(response.getSlaveGroup());
 		writer.writeEndElement();
+		
+		writer.writeStartElement("vendor");
+		writer.writeCharacters(response.getVendor());
+		writer.writeEndElement();
+		
 		writer.writeStartElement("slaves");
 		
 		for (Slave slave : response.getSlaves()) {

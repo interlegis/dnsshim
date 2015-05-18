@@ -33,6 +33,7 @@ import org.apache.log4j.Logger;
 
 import br.registro.dnsshim.util.DatabaseUtil;
 import br.registro.dnsshim.xfrd.dao.filesystem.SlaveGroupDao;
+import br.registro.dnsshim.xfrd.dao.filesystem.SlaveGroupDao.ExtensionType;
 import br.registro.dnsshim.xfrd.domain.Slave;
 import br.registro.dnsshim.xfrd.domain.SlaveGroup;
 import br.registro.dnsshim.xfrd.domain.XfrdConfig;
@@ -82,9 +83,16 @@ public class SlaveGroupDumper implements Runnable {
 					}
 
 					String path = slaveGroupDao.getBaseDir();
-					String addedFile = path + slaveGroup.getName() + SlaveGroupDao.ADDED_COMMAND_EXTENSION;
-					String removedFile = path + slaveGroup.getName() + SlaveGroupDao.REMOVED_COMMAND_EXTENSION;
-					command.append(xfrdConfig.getSlaveSyncPath());
+					
+					String addedFile = path + slaveGroup.getName() + slaveGroupDao.getFileExtension(slaveGroup, ExtensionType.ADDED_COMMAND); 
+					String removedFile = path + slaveGroup.getName() + slaveGroupDao.getFileExtension(slaveGroup, ExtensionType.REMOVED_COMMAND);
+					
+					if (slaveGroup.getVendor().equals("nsd")) {
+						command.append(xfrdConfig.getNsdSyncPath());
+					} else {
+						command.append(xfrdConfig.getBindSyncPath());
+					}
+					
 					command.append(' ');
 					command.append(addedFile);
 					command.append(' ');
@@ -92,13 +100,9 @@ public class SlaveGroupDumper implements Runnable {
 					command.append(' ');
 					command.append(hostAddress);
 					command.append(' ');
-					command.append(xfrdConfig.getRndcPort());
-					command.append(' ');
-					command.append(xfrdConfig.getRndcPath());
-					command.append(' ');
 					command.append(now);
 
-					logger.debug("Executing SlaveSync: " + command);
+					logger.info("Executing SlaveSync: " + command);
 					ExecThread e = new ExecThread(command.toString());
 					e.start();
 				}

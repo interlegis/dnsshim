@@ -25,11 +25,14 @@ package br.registro.dnsshim.xfrd.dns.notifier.domain;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import br.registro.dnsshim.domain.Soa;
+
 public class ZoneNotify {
 	private String zonename;
 	private String slaveAddress;
 	private short queryId;
 	private int slavePort;
+	private Soa soa;
 	private AtomicInteger notifySent = new AtomicInteger(0);
 
 	public String getZonename() {
@@ -70,6 +73,14 @@ public class ZoneNotify {
 
 	public void setSlavePort(int slavePort) {
 		this.slavePort = slavePort;
+	}
+	
+	public Soa getSoa() {
+		return soa;
+	}
+
+	public void setSoa(Soa soa) {
+		this.soa = soa;
 	}
 
 	@Override
